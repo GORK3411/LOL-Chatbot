@@ -1,0 +1,9 @@
+Authentication: C#
+Front end : React
+LLM : python (langchain)
+
+-------
+currently: get LOL champions data
+
+stuff done:
+- Choose LLM: Gemini
