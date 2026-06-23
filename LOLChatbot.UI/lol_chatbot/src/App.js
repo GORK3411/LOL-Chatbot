@@ -5,8 +5,12 @@ import "./styles/ChatHistory.css";
 import ChatHistory from "./components/ChatMessage";
 import SignUpForm from "./components/SignUpForm";
 import LoginForm from "./components/LoginForm";
+import { Routes, Route } from "react-router-dom";
+
+import SignUpPage from "./pages/SignUpPage";
 function App() {
   return (
+    /*
     <div className="App">
       <SignUpForm />
       <LoginForm />
@@ -19,6 +23,10 @@ function App() {
         ]}
       />
     </div>
+    */
+    <Routes>
+      <Route path="/" element={<SignUpPage />} ></Route>
+    </Routes>
   );
 }
 

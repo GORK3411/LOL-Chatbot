@@ -20,7 +20,7 @@ namespace LOLChatbot.Api.Services
         }
         public async Task<string?> LoginAsync(UserDto userDto)
         {
-            User? user = await userRepository.GetUserByUsername(userDto.Username);
+            User? user = await userRepository.GetUserByEmail(userDto.Email);
             if(user == null)
                 return null;
             
@@ -43,6 +43,7 @@ namespace LOLChatbot.Api.Services
             User user = new()
             { 
                 Username = userDto.Username,
+                Email = userDto.Email,
                 PasswordHash = hashedPassword
             };
 

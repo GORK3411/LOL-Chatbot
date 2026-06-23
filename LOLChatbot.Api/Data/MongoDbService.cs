@@ -21,7 +21,7 @@ namespace LOLChatbot.Api.Data
         private void CreateIndexes()
         {
             var users = Database.GetCollection<User>("users");
-            var indexKeys = Builders<User>.IndexKeys.Ascending(u => u.Username);
+            var indexKeys = Builders<User>.IndexKeys.Ascending(u => u.Email);
             var indexOptions = new CreateIndexOptions { Unique = true };
             users.Indexes.CreateOne(new CreateIndexModel<User>(indexKeys, indexOptions));
         }

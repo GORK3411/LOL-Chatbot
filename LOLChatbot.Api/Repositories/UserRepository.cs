@@ -19,6 +19,11 @@ namespace LOLChatbot.Api.Repositories
             return user;
         }
 
+        public async Task<User?> GetUserByEmail(string email)
+        {
+            return await users.Find(u => u.Email == email).FirstOrDefaultAsync();
+        }
+
         public async Task<User?> GetUserById(string id)
         {
             return await users.Find(u => u.Id == id).FirstOrDefaultAsync();
