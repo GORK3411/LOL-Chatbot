@@ -29,7 +29,7 @@ from langchain.chat_models import init_chat_model
 from langchain.messages import HumanMessage, AIMessage, SystemMessage
 
 # model = init_chat_model(model="google_genai:gemini-2.5-flash", temperature=0)
-model = init_chat_model(model="ollama:llama3.1:8b", temperature=0)
+model = init_chat_model(model="ollama:llama3.2:latest", temperature=0)
 checkpointer = InMemorySaver()
 
 agent = create_agent(
@@ -40,7 +40,7 @@ agent = create_agent(
 )
 
 conversation = [
-    HumanMessage("What is warwick attackrange? is it 125?"),
+    HumanMessage("What is the range of warwick?"),
 ]
 
 

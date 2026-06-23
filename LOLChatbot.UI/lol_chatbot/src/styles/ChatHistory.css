@@ -1,0 +1,6 @@
+.ChatHistory
+{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);  /* 5 equal columns */
+    grid-template-rows: auto;
+}
