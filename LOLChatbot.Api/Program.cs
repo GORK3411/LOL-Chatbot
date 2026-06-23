@@ -13,6 +13,17 @@ namespace LOLChatbot.Api
 
             // Add services to the container.
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("ReactPolicy", policy =>
+                {
+                    policy
+                        .WithOrigins("http://localhost:3000")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
@@ -47,6 +58,8 @@ namespace LOLChatbot.Api
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors("ReactPolicy");
 
             app.UseAuthorization();
 

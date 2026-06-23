@@ -6,8 +6,9 @@ import ChatHistory from "./components/ChatMessage";
 import SignUpForm from "./components/SignUpForm";
 import LoginForm from "./components/LoginForm";
 import { Routes, Route } from "react-router-dom";
-
 import SignUpPage from "./pages/SignUpPage";
+import LoginPage from "./pages/LoginPage";
+import ChatPage from "./pages/ChatPage";
 function App() {
   return (
     /*
@@ -25,7 +26,9 @@ function App() {
     </div>
     */
     <Routes>
-      <Route path="/" element={<SignUpPage />} ></Route>
+      <Route path="/" element={<SignUpPage />}></Route>
+      <Route path="/login" element={<LoginPage />}></Route>
+      <Route path="/chat" element={<ChatPage />}></Route>
     </Routes>
   );
 }

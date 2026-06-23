@@ -10,7 +10,7 @@ export default function SignUpForm() {
   const handleSubmit = async (e) => {
     e.preventDefault(); // prevent page reload
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch("https://localhost:7246/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(user),
@@ -26,16 +26,31 @@ export default function SignUpForm() {
   return (
     <form onSubmit={handleSubmit}>
       <label htmlFor="username">Username:</label>
-      <input type="text" id="username" name="username"
-        value={user.username} onChange={handleChange} />
+      <input
+        type="text"
+        id="username"
+        name="username"
+        value={user.username}
+        onChange={handleChange}
+      />
 
       <label htmlFor="email">Email:</label>
-      <input type="email" id="email" name="email"
-        value={user.email} onChange={handleChange} />
+      <input
+        type="email"
+        id="email"
+        name="email"
+        value={user.email}
+        onChange={handleChange}
+      />
 
       <label htmlFor="password">Password:</label>
-      <input type="password" id="password" name="password"
-        value={user.password} onChange={handleChange} />
+      <input
+        type="password"
+        id="password"
+        name="password"
+        value={user.password}
+        onChange={handleChange}
+      />
 
       <button type="submit">Sign Up</button>
     </form>

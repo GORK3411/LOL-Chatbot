@@ -3,4 +3,6 @@
     display: grid;
     grid-template-columns: repeat(5, 1fr);  /* 5 equal columns */
     grid-template-rows: auto;
+    border: 1px solid black;
+    height: 100%;
 }

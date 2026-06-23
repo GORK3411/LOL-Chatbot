@@ -4,6 +4,7 @@ function ChatMessage(props) {
       style={{
         backgroundColor: props.isUser ? "lightgray" : "lightblue",
         gridColumn: props.isUser ? "span 3 / -1" : "1 / span 3",
+        height: "100%",
       }}
     >
       <p>{props.message}</p>
@@ -13,7 +14,7 @@ function ChatMessage(props) {
 
 export default function ChatHistory(props) {
   return (
-    <div>
+    <div style={{ height: "100%" }}>
       <div className="ChatHistory">
         {props.messages.map((message, index) => (
           <ChatMessage

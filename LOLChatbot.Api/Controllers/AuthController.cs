@@ -47,7 +47,7 @@ namespace LOLChatbot.Api.Controllers
         }
 
         [Authorize]
-        [HttpGet("me")]
+        [HttpGet("test")]
         public ActionResult<string> AuthorizeTest()
         {
             return Ok("AAAAA");
