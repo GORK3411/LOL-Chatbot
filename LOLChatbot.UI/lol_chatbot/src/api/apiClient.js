@@ -1,4 +1,4 @@
-const API_URL = "https://localhost:7246";
+const API_URL = "http://localhost:5170";
 
 export async function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem("token");

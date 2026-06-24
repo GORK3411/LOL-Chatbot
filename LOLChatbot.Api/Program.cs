@@ -29,11 +29,12 @@ namespace LOLChatbot.Api
             builder.Services.AddOpenApi();
             builder.Services.AddSwaggerGen();
             builder.Services.AddSingleton<Data.MongoDbService>();
-            builder.Services.AddScoped<IUserRepository,UserRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IChatRepository, MockChatRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options=>
+                .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                     {
@@ -42,7 +43,7 @@ namespace LOLChatbot.Api
                         ValidateAudience = true,
                         ValidAudience = builder.Configuration["AppSettings:Audience"],
                         ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true, 
+                        ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
                             System.Text.Encoding.UTF8.GetBytes(builder.Configuration["AppSettings:Token"] ?? throw new InvalidOperationException("JWT key not found in configuration")))
                     };

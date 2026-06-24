@@ -1,8 +1,7 @@
-﻿using LOLChatbot.Api.Data;
-using LOLChatbot.Api.Entities;
+﻿using LOLChatbot.Api.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
+using LOLChatbot.Api.Repositories;
 
 namespace LOLChatbot.Api.Controllers
 {
@@ -10,26 +9,26 @@ namespace LOLChatbot.Api.Controllers
     [ApiController]
     public class ChatController : ControllerBase
     {
-        private readonly IMongoCollection<Chat> chats;
-        public ChatController(MongoDbService mongoDbService)
+        private readonly IChatRepository chatRepository;
+
+        public ChatController(IChatRepository chatRepository)
         {
-            chats = mongoDbService.Database.GetCollection<Chat>("chats");
+            this.chatRepository = chatRepository;
         }
 
         //Get chat by id
         [HttpGet("{id}")]
-        public ActionResult<Chat> GetChatById(string id)
+        public async Task<ActionResult<Chat>> GetChatById(string id)
         {
-            var filter = Builders<Chat>.Filter.Eq(c => c.Id, id);
-            var chat = chats.Find(filter).FirstOrDefault();
+            var chat = await chatRepository.GetChatByIdAsync(id);
             return chat != null ? Ok(chat) : NotFound();
         }
 
         //Create a new chat
         [HttpPost]
-        public async Task<ActionResult<Chat>> CreateChat([FromBody] Chat chat)
+        public async Task<ActionResult<Chat>> CreateChat(string chatName)
         {
-            await chats.InsertOneAsync(chat);
+            var chat = await chatRepository.CreateChatAsync(chatName);
             return CreatedAtAction(nameof(GetChatById), new { id = chat.Id }, chat);
         }
 
@@ -37,9 +36,35 @@ namespace LOLChatbot.Api.Controllers
         [HttpDelete("delete/{id}")]
         public async Task<ActionResult> DeleteChat(string id)
         {
-            var filter = Builders<Chat>.Filter.Eq(c => c.Id, id);
-            var result = await chats.DeleteOneAsync(filter);
-            return result.DeletedCount > 0 ? NoContent() : NotFound();
+            return await chatRepository.DeleteChatAsync(id) ? NoContent() : NotFound();
+        }
+
+        //Get all chats per UserId
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<List<Chat>>> GetChatsByUserId(string userId)
+        {
+            var userChats = await chatRepository.GetChatsByUserIdAsync(userId);
+            return Ok(userChats);
+        }
+
+        //Send a message to a chat and get the agent's reply
+        [HttpPost("{chatId}/messages")]
+        public async Task<ActionResult<string>> SendMessage(string chatId, [FromQuery] string message)
+        {
+            var userAdded = await chatRepository.AddMessageToChatAsync(chatId, message);
+            if (!userAdded) return NotFound();
+
+            const string agentReply = "This is a placeholder answer from the agent.";
+            await chatRepository.AddMessageToChatAsync(chatId, agentReply);
+
+            return Ok(agentReply);
+        }
+
+        //Rename a chat
+        [HttpPut("{id}/rename")]
+        public async Task<ActionResult> RenameChat(string id, [FromQuery] string newName)
+        {
+            return await chatRepository.RenameChat(id, newName) ? NoContent() : NotFound();
         }
     }
 }
