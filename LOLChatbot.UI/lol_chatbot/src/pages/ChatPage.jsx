@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   addMessageToChat,
   createChat,
@@ -8,31 +8,118 @@ import {
   renameChat,
 } from "../api/ChatClient";
 
-function ChatMessage(props) {
+const C = {
+  bg: "#0a1428",
+  sidebarBg: "#0a1830",
+  border: "#1b2c4d",
+  gold: "#c8aa6e",
+  textLight: "#f0e6d2",
+  textMed: "#cdbe91",
+  textMuted: "#a09b8c",
+  textSubtle: "#5b6b87",
+  inputBg: "#06101f",
+  userMsgBg: "#0e2348",
+  inputBarBg: "#0a1830",
+  inputBarBorder: "#2a4271",
+};
+
+function HexLogo() {
   return (
-    <div
-      style={{
-        backgroundColor: props.isUser ? "lightgray" : "lightblue",
-        gridColumn: props.isUser ? "span 3 / -1" : "1 / span 3",
-        height: "100%",
-      }}
-    >
-      <p>{props.message}</p>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <polygon points="12,2 21,7 21,17 12,22 3,17 3,7" stroke={C.gold} strokeWidth="1.5" fill="none" />
+      <polygon points="12,7 17,9.5 17,14.5 12,17 7,14.5 7,9.5" fill={C.gold} />
+    </svg>
+  );
+}
+
+function HexAvatar() {
+  return (
+    <div style={{
+      flexShrink: 0,
+      width: "30px",
+      height: "30px",
+      border: `1px solid ${C.gold}`,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <polygon points="12,3 20,8 20,16 12,21 4,16 4,8" stroke={C.gold} strokeWidth="1.5" />
+      </svg>
     </div>
   );
 }
 
-function ChatHistory(props) {
+function DiamondDot() {
   return (
-    <div style={{ height: "100%" }}>
-      <div className="ChatHistory">
-        {props.messages.map((message, index) => (
-          <ChatMessage
-            key={index}
-            message={message.text}
-            isUser={message.isUser}
-          />
-        ))}
+    <svg width="10" height="10" viewBox="0 0 10 10">
+      <polygon points="5,0 10,5 5,10 0,5" fill={C.gold} />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+      style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)" }}>
+      <circle cx="11" cy="11" r="7" stroke={C.textSubtle} strokeWidth="2" />
+      <line x1="16" y1="16" x2="20" y2="20" stroke={C.textSubtle} strokeWidth="2" />
+    </svg>
+  );
+}
+
+function groupChatsByDate(chats) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const sevenDaysAgo = new Date(today);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  const groups = { TODAY: [], YESTERDAY: [], "PREVIOUS 7 DAYS": [], OLDER: [] };
+  for (const chat of chats) {
+    const d = new Date(chat.lastUpdate);
+    d.setHours(0, 0, 0, 0);
+    if (d >= today) groups.TODAY.push(chat);
+    else if (d >= yesterday) groups.YESTERDAY.push(chat);
+    else if (d >= sevenDaysAgo) groups["PREVIOUS 7 DAYS"].push(chat);
+    else groups.OLDER.push(chat);
+  }
+  return groups;
+}
+
+function ChatMessage({ message, isUser }) {
+  if (isUser) {
+    return (
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "22px" }}>
+        <div style={{
+          maxWidth: "78%",
+          background: C.userMsgBg,
+          border: `1px solid ${C.gold}`,
+          padding: "12px 16px",
+          color: C.textLight,
+          fontSize: "14px",
+          lineHeight: "1.5",
+        }}>
+          {message}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div style={{ display: "flex", gap: "14px", marginBottom: "22px" }}>
+      <HexAvatar />
+      <div style={{ flex: 1, maxWidth: "78%" }}>
+        <div style={{
+          fontFamily: "'Cinzel', serif",
+          fontSize: "11px",
+          letterSpacing: "0.18em",
+          color: C.gold,
+          marginBottom: "8px",
+        }}>ATLAS</div>
+        <div style={{ fontSize: "14px", lineHeight: "1.6", color: C.textMed }}>
+          {message}
+        </div>
       </div>
     </div>
   );
@@ -44,56 +131,52 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [inputText, setInputText] = useState("");
+  const [hoveredChatId, setHoveredChatId] = useState(null);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        const userChats = await getChatsByUserId("user-1");
-        setChats(userChats);
-      } catch (error) {
-        console.error("Failed to fetch chats:", error);
-      }
-    };
-
-    fetchChats();
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap";
+    document.head.appendChild(link);
+    return () => document.head.removeChild(link);
   }, []);
 
-  const handleChatClick = async (chatId) => {
-    try {
-      setSelectedChatId(chatId);
-      const chat = await getChatById(chatId);
-      const chatMessages = (chat.messages ?? []).map((message, index) => ({
-        text: message,
-        isUser: index % 2 === 0,
-      }));
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-      setMessages(chatMessages);
-    } catch (error) {
-      console.error("Failed to fetch chat:", error);
-      setMessages([]);
-    }
-  };
+  useEffect(() => {
+    getChatsByUserId("user-1")
+      .then(setChats)
+      .catch((err) => console.error("Failed to fetch chats:", err));
+  }, []);
 
   const refreshChats = async () => {
     const userChats = await getChatsByUserId("user-1");
     setChats(userChats);
   };
 
+  const handleChatClick = async (chatId) => {
+    try {
+      setSelectedChatId(chatId);
+      const chat = await getChatById(chatId);
+      setMessages(
+        (chat.messages ?? []).map((text, i) => ({ text, isUser: i % 2 === 0 }))
+      );
+    } catch (error) {
+      console.error("Failed to fetch chat:", error);
+      setMessages([]);
+    }
+  };
+
   const handleRenameChat = async (chatId, currentName) => {
     const newName = window.prompt("Rename chat", currentName);
-
-    if (newName === null) {
-      return;
-    }
-
-    const trimmedName = newName.trim();
-
-    if (!trimmedName || trimmedName === currentName) {
-      return;
-    }
-
+    if (newName === null) return;
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === currentName) return;
     try {
-      await renameChat(chatId, trimmedName);
+      await renameChat(chatId, trimmed);
       await refreshChats();
     } catch (error) {
       console.error("Failed to rename chat:", error);
@@ -101,18 +184,10 @@ export default function ChatPage() {
   };
 
   const handleDeleteChat = async (chatId) => {
-    const confirmed = window.confirm("Delete this chat?");
-
-    if (!confirmed) {
-      return;
-    }
-
+    if (!window.confirm("Delete this chat?")) return;
     try {
       await deleteChat(chatId);
-      setChats((currentChats) =>
-        currentChats.filter((chat) => chat.id !== chatId),
-      );
-
+      setChats((curr) => curr.filter((c) => c.id !== chatId));
       if (selectedChatId === chatId) {
         setSelectedChatId(null);
         setMessages([]);
@@ -124,20 +199,12 @@ export default function ChatPage() {
 
   const handleNewChat = async () => {
     const chatName = window.prompt("New chat name", "New chat");
-
-    if (chatName === null) {
-      return;
-    }
-
-    const trimmedName = chatName.trim();
-
-    if (!trimmedName) {
-      return;
-    }
-
+    if (chatName === null) return;
+    const trimmed = chatName.trim();
+    if (!trimmed) return;
     try {
-      const newChat = await createChat(trimmedName);
-      setChats((currentChats) => [...currentChats, newChat]);
+      const newChat = await createChat(trimmed);
+      setChats((curr) => [...curr, newChat]);
       setSelectedChatId(newChat.id);
       setMessages([]);
       setSearchTerm("");
@@ -151,10 +218,9 @@ export default function ChatPage() {
     if (!text || !selectedChatId) return;
     setMessages((prev) => [...prev, { text, isUser: true }]);
     setInputText("");
-
     try {
-      const agentReply = await addMessageToChat(selectedChatId, text);
-      setMessages((prev) => [...prev, { text: agentReply, isUser: false }]);
+      const reply = await addMessageToChat(selectedChatId, text);
+      setMessages((prev) => [...prev, { text: reply, isUser: false }]);
     } catch (error) {
       console.error("Failed to send message:", error);
     }
@@ -164,98 +230,289 @@ export default function ChatPage() {
     .slice()
     .sort((a, b) => new Date(b.lastUpdate) - new Date(a.lastUpdate))
     .filter((chat) =>
-      (chat.chatName ?? "").toLowerCase().includes(searchTerm.toLowerCase()),
+      (chat.chatName ?? "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-  return (
-    <div
-      style={{
-        padding: "20px",
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gridTemplateRows: "auto",
-      }}
-    >
-      <div>
-        <div>
-          <button type="button" onClick={handleNewChat}>
-            New Chat
-          </button>
-          <br />
-          <input
-            type="text"
-            placeholder="Search chats..."
-            id="searchBar"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+  const chatGroups = groupChatsByDate(visibleChats);
+  const selectedChat = chats.find((c) => c.id === selectedChatId);
 
-        <div id="chats">
-          {visibleChats.map((chat) => (
-            <div
-              key={chat.id}
-              style={{
-                padding: "10px",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "12px",
-              }}
-              onClick={() => handleChatClick(chat.id)}
-            >
-              <span>{chat.chatName}</span>
-              <span style={{ display: "flex", gap: "8px" }}>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRenameChat(chat.id, chat.chatName);
-                  }}
-                >
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteChat(chat.id);
-                  }}
-                >
-                  Delete
-                </button>
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div
-        style={{
-          gridColumn: "2 / -1",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <ChatHistory messages={messages} />
-        <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
-          <input
-            type="text"
-            placeholder="Type a message..."
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-            disabled={!selectedChatId}
-            style={{ flex: 1 }}
-          />
+  const inputBarStyle = {
+    background: C.inputBarBg,
+    border: `1px solid ${C.inputBarBorder}`,
+    padding: "12px 16px",
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  };
+
+  const inputStyle = {
+    flex: 1,
+    background: "transparent",
+    border: "none",
+    outline: "none",
+    color: C.textMed,
+    fontFamily: "'Inter', sans-serif",
+    fontSize: "14px",
+  };
+
+  const sendBtnStyle = (disabled) => ({
+    background: C.gold,
+    color: C.bg,
+    border: "none",
+    padding: "9px 18px",
+    fontFamily: "'Cinzel', serif",
+    fontSize: "11px",
+    fontWeight: 600,
+    letterSpacing: "0.22em",
+    cursor: disabled ? "default" : "pointer",
+    opacity: disabled ? 0.4 : 1,
+  });
+
+  return (
+    <div style={{
+      width: "100vw",
+      height: "100vh",
+      background: C.bg,
+      display: "flex",
+      fontFamily: "'Inter', sans-serif",
+      color: C.textMed,
+      overflow: "hidden",
+    }}>
+      {/* ── Sidebar ── */}
+      <div style={{
+        width: "288px",
+        flexShrink: 0,
+        background: C.sidebarBg,
+        borderRight: `1px solid ${C.border}`,
+        display: "flex",
+        flexDirection: "column",
+      }}>
+        <div style={{ padding: "22px 22px 18px 22px", borderBottom: `1px solid ${C.border}` }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "18px" }}>
+            <HexLogo />
+            <span style={{
+              fontFamily: "'Cinzel', serif",
+              fontSize: "14px",
+              fontWeight: 600,
+              color: C.textLight,
+              letterSpacing: "0.18em",
+            }}>ARCANE ATLAS</span>
+          </div>
+
           <button
             type="button"
-            onClick={handleSendMessage}
-            disabled={!selectedChatId || !inputText.trim()}
+            onClick={handleNewChat}
+            style={{
+              width: "100%",
+              padding: "11px 14px",
+              background: "transparent",
+              border: `1px solid ${C.gold}`,
+              color: C.textLight,
+              fontFamily: "'Cinzel', serif",
+              fontSize: "11px",
+              letterSpacing: "0.22em",
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+            }}
           >
-            Send
+            <span style={{ fontSize: "14px", lineHeight: 1 }}>+</span> NEW SUMMONING
           </button>
+
+          <div style={{ position: "relative", marginTop: "14px" }}>
+            <SearchIcon />
+            <input
+              type="text"
+              placeholder="Search the archives"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                padding: "9px 12px 9px 34px",
+                background: C.inputBg,
+                border: `1px solid ${C.border}`,
+                color: C.textMed,
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "13px",
+                outline: "none",
+              }}
+            />
+          </div>
         </div>
+
+        <div style={{ flex: 1, overflowY: "auto", padding: "14px 12px" }}>
+          {Object.entries(chatGroups).map(([group, groupChats]) =>
+            groupChats.length === 0 ? null : (
+              <div key={group}>
+                <div style={{
+                  fontFamily: "'Cinzel', serif",
+                  fontSize: "10px",
+                  letterSpacing: "0.22em",
+                  color: C.textSubtle,
+                  padding: "6px 10px",
+                  marginTop: "8px",
+                }}>{group}</div>
+                {groupChats.map((chat) => {
+                  const isSelected = selectedChatId === chat.id;
+                  const isHovered = hoveredChatId === chat.id;
+                  return (
+                    <div
+                      key={chat.id}
+                      onClick={() => handleChatClick(chat.id)}
+                      onMouseEnter={() => setHoveredChatId(chat.id)}
+                      onMouseLeave={() => setHoveredChatId(null)}
+                      style={{
+                        padding: "9px 10px",
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        color: isSelected ? C.textLight : C.textMuted,
+                        background: isSelected ? "#0e2348" : isHovered ? "rgba(200,170,110,0.05)" : "transparent",
+                        borderLeft: isSelected ? `2px solid ${C.gold}` : "2px solid transparent",
+                        transition: "background 0.15s",
+                      }}
+                    >
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                        {chat.chatName}
+                      </span>
+                      {isHovered && (
+                        <span style={{ display: "flex", gap: "4px", flexShrink: 0, marginLeft: "6px" }}>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handleRenameChat(chat.id, chat.chatName); }}
+                            title="Rename"
+                            style={{
+                              background: "none",
+                              border: "none",
+                              color: C.gold,
+                              cursor: "pointer",
+                              fontSize: "12px",
+                              padding: "2px 4px",
+                              lineHeight: 1,
+                            }}
+                          >✎</button>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handleDeleteChat(chat.id); }}
+                            title="Delete"
+                            style={{
+                              background: "none",
+                              border: "none",
+                              color: C.textSubtle,
+                              cursor: "pointer",
+                              fontSize: "12px",
+                              padding: "2px 4px",
+                              lineHeight: 1,
+                            }}
+                          >✕</button>
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          )}
+        </div>
+      </div>
+
+      {/* ── Main area ── */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        {!selectedChatId ? (
+          /* Empty state */
+          <div style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "40px",
+          }}>
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" style={{ marginBottom: "24px", opacity: 0.85 }}>
+              <polygon points="12,2 21,7 21,17 12,22 3,17 3,7" stroke={C.gold} strokeWidth="1.2" fill="none" />
+              <polygon points="12,7 17,9.5 17,14.5 12,17 7,14.5 7,9.5" stroke={C.gold} strokeWidth="1" fill="none" />
+            </svg>
+            <div style={{
+              fontFamily: "'Cinzel', serif",
+              fontSize: "26px",
+              fontWeight: 500,
+              color: C.textLight,
+              letterSpacing: "0.04em",
+              marginBottom: "10px",
+            }}>Summon a champion</div>
+            <div style={{
+              fontSize: "14px",
+              color: C.textSubtle,
+              marginBottom: "36px",
+            }}>Select a chat or start a new summoning.</div>
+
+            <div style={{ width: "100%", maxWidth: "640px", ...inputBarStyle }}>
+              <input
+                type="text"
+                placeholder="What would you ask the Atlas?"
+                disabled
+                style={{ ...inputStyle, opacity: 0.4, cursor: "not-allowed" }}
+              />
+              <button type="button" disabled style={sendBtnStyle(true)}>SEND</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Chat header */}
+            <div style={{
+              padding: "18px 28px",
+              borderBottom: `1px solid ${C.border}`,
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              flexShrink: 0,
+            }}>
+              <DiamondDot />
+              <div style={{
+                fontFamily: "'Cinzel', serif",
+                fontSize: "14px",
+                color: C.textLight,
+                letterSpacing: "0.10em",
+              }}>
+                {selectedChat?.chatName?.toUpperCase()}
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "24px 56px" }}>
+              {messages.map((msg, i) => (
+                <ChatMessage key={i} message={msg.text} isUser={msg.isUser} />
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input bar */}
+            <div style={{ padding: "18px 28px", borderTop: `1px solid ${C.border}`, flexShrink: 0 }}>
+              <div style={inputBarStyle}>
+                <input
+                  type="text"
+                  placeholder="Continue the consultation…"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                  style={inputStyle}
+                />
+                <button
+                  type="button"
+                  onClick={handleSendMessage}
+                  disabled={!inputText.trim()}
+                  style={sendBtnStyle(!inputText.trim())}
+                >SEND</button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
