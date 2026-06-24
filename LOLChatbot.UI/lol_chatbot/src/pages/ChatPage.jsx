@@ -132,7 +132,12 @@ export default function ChatPage() {
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [inputText, setInputText] = useState("");
   const [hoveredChatId, setHoveredChatId] = useState(null);
+  const [newChatModal, setNewChatModal] = useState({ open: false, value: "" });
+  const [deleteModal, setDeleteModal] = useState({ open: false, chatId: null, chatName: "" });
+  const [renameModal, setRenameModal] = useState({ open: false, chatId: null, value: "" });
   const messagesEndRef = useRef(null);
+  const newChatInputRef = useRef(null);
+  const renameInputRef = useRef(null);
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -170,11 +175,20 @@ export default function ChatPage() {
     }
   };
 
-  const handleRenameChat = async (chatId, currentName) => {
-    const newName = window.prompt("Rename chat", currentName);
-    if (newName === null) return;
-    const trimmed = newName.trim();
-    if (!trimmed || trimmed === currentName) return;
+  const handleRenameChat = (chatId, currentName) => {
+    setRenameModal({ open: true, chatId, value: currentName });
+    setTimeout(() => renameInputRef.current?.select(), 0);
+  };
+
+  const submitRenameChat = async () => {
+    const { chatId, value } = renameModal;
+    const trimmed = value.trim();
+    const currentName = chats.find((c) => c.id === chatId)?.chatName ?? "";
+    if (!trimmed || trimmed === currentName) {
+      setRenameModal({ open: false, chatId: null, value: "" });
+      return;
+    }
+    setRenameModal({ open: false, chatId: null, value: "" });
     try {
       await renameChat(chatId, trimmed);
       await refreshChats();
@@ -183,8 +197,14 @@ export default function ChatPage() {
     }
   };
 
-  const handleDeleteChat = async (chatId) => {
-    if (!window.confirm("Delete this chat?")) return;
+  const handleDeleteChat = (chatId) => {
+    const chat = chats.find((c) => c.id === chatId);
+    setDeleteModal({ open: true, chatId, chatName: chat?.chatName ?? "" });
+  };
+
+  const confirmDeleteChat = async () => {
+    const { chatId } = deleteModal;
+    setDeleteModal({ open: false, chatId: null, chatName: "" });
     try {
       await deleteChat(chatId);
       setChats((curr) => curr.filter((c) => c.id !== chatId));
@@ -197,11 +217,15 @@ export default function ChatPage() {
     }
   };
 
-  const handleNewChat = async () => {
-    const chatName = window.prompt("New chat name", "New chat");
-    if (chatName === null) return;
-    const trimmed = chatName.trim();
+  const handleNewChat = () => {
+    setNewChatModal({ open: true, value: "New chat" });
+    setTimeout(() => newChatInputRef.current?.select(), 0);
+  };
+
+  const submitNewChat = async () => {
+    const trimmed = newChatModal.value.trim();
     if (!trimmed) return;
+    setNewChatModal({ open: false, value: "" });
     try {
       const newChat = await createChat(trimmed);
       setChats((curr) => [...curr, newChat]);
@@ -514,6 +538,306 @@ export default function ChatPage() {
           </>
         )}
       </div>
+
+      {/* ── New Chat Modal ── */}
+      {newChatModal.open && (
+        <div
+          onClick={() => setNewChatModal({ open: false, value: "" })}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(6,16,31,0.85)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: C.sidebarBg,
+              border: `1px solid ${C.gold}`,
+              padding: "32px",
+              minWidth: "400px",
+            }}
+          >
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginBottom: "20px",
+            }}>
+              <DiamondDot />
+              <span style={{
+                fontFamily: "'Cinzel', serif",
+                fontSize: "15px",
+                fontWeight: 600,
+                color: C.textLight,
+                letterSpacing: "0.14em",
+              }}>NEW SUMMONING</span>
+            </div>
+
+            <div style={{ height: "1px", background: C.border, marginBottom: "20px" }} />
+
+            <div style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: "11px",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: C.textSubtle,
+              marginBottom: "8px",
+            }}>Summoning name</div>
+            <input
+              ref={newChatInputRef}
+              type="text"
+              value={newChatModal.value}
+              onChange={(e) => setNewChatModal((s) => ({ ...s, value: e.target.value }))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") submitNewChat();
+                if (e.key === "Escape") setNewChatModal({ open: false, value: "" });
+              }}
+              autoFocus
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                padding: "10px 14px",
+                background: C.inputBg,
+                border: `1px solid ${C.border}`,
+                color: C.textMed,
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "14px",
+                outline: "none",
+              }}
+            />
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "24px" }}>
+              <button
+                type="button"
+                onClick={() => setNewChatModal({ open: false, value: "" })}
+                style={{
+                  padding: "9px 18px",
+                  background: "transparent",
+                  border: `1px solid ${C.border}`,
+                  color: C.textMuted,
+                  fontFamily: "'Cinzel', serif",
+                  fontSize: "11px",
+                  letterSpacing: "0.18em",
+                  cursor: "pointer",
+                }}
+              >CANCEL</button>
+              <button
+                type="button"
+                onClick={submitNewChat}
+                disabled={!newChatModal.value.trim()}
+                style={{
+                  padding: "9px 18px",
+                  background: C.gold,
+                  border: "none",
+                  color: C.bg,
+                  fontFamily: "'Cinzel', serif",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  letterSpacing: "0.22em",
+                  cursor: newChatModal.value.trim() ? "pointer" : "default",
+                  opacity: newChatModal.value.trim() ? 1 : 0.4,
+                }}
+              >CREATE</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Rename Modal ── */}
+      {renameModal.open && (
+        <div
+          onClick={() => setRenameModal({ open: false, chatId: null, value: "" })}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(6,16,31,0.85)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: C.sidebarBg,
+              border: `1px solid ${C.gold}`,
+              padding: "32px",
+              minWidth: "400px",
+            }}
+          >
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginBottom: "20px",
+            }}>
+              <DiamondDot />
+              <span style={{
+                fontFamily: "'Cinzel', serif",
+                fontSize: "15px",
+                fontWeight: 600,
+                color: C.textLight,
+                letterSpacing: "0.14em",
+              }}>RENAME SUMMONING</span>
+            </div>
+
+            <div style={{ height: "1px", background: C.border, marginBottom: "20px" }} />
+
+            <div style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: "11px",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: C.textSubtle,
+              marginBottom: "8px",
+            }}>New name</div>
+            <input
+              ref={renameInputRef}
+              type="text"
+              value={renameModal.value}
+              onChange={(e) => setRenameModal((s) => ({ ...s, value: e.target.value }))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") submitRenameChat();
+                if (e.key === "Escape") setRenameModal({ open: false, chatId: null, value: "" });
+              }}
+              autoFocus
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                padding: "10px 14px",
+                background: C.inputBg,
+                border: `1px solid ${C.border}`,
+                color: C.textMed,
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "14px",
+                outline: "none",
+              }}
+            />
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "24px" }}>
+              <button
+                type="button"
+                onClick={() => setRenameModal({ open: false, chatId: null, value: "" })}
+                style={{
+                  padding: "9px 18px",
+                  background: "transparent",
+                  border: `1px solid ${C.border}`,
+                  color: C.textMuted,
+                  fontFamily: "'Cinzel', serif",
+                  fontSize: "11px",
+                  letterSpacing: "0.18em",
+                  cursor: "pointer",
+                }}
+              >CANCEL</button>
+              <button
+                type="button"
+                onClick={submitRenameChat}
+                disabled={!renameModal.value.trim()}
+                style={{
+                  padding: "9px 18px",
+                  background: C.gold,
+                  border: "none",
+                  color: C.bg,
+                  fontFamily: "'Cinzel', serif",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  letterSpacing: "0.22em",
+                  cursor: renameModal.value.trim() ? "pointer" : "default",
+                  opacity: renameModal.value.trim() ? 1 : 0.4,
+                }}
+              >RENAME</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Confirm Modal ── */}
+      {deleteModal.open && (
+        <div
+          onClick={() => setDeleteModal({ open: false, chatId: null, chatName: "" })}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(6,16,31,0.85)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: C.sidebarBg,
+              border: `1px solid ${C.border}`,
+              padding: "32px",
+              minWidth: "400px",
+            }}
+          >
+            <div style={{
+              fontFamily: "'Cinzel', serif",
+              fontSize: "15px",
+              fontWeight: 600,
+              color: C.textLight,
+              letterSpacing: "0.14em",
+              marginBottom: "20px",
+            }}>CONFIRM DELETION</div>
+
+            <div style={{ height: "1px", background: C.border, marginBottom: "20px" }} />
+
+            <div style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: "14px",
+              color: C.textMuted,
+              lineHeight: "1.6",
+            }}>
+              Delete{" "}
+              <span style={{ color: C.textLight, fontStyle: "italic" }}>
+                "{deleteModal.chatName}"
+              </span>
+              ? This cannot be undone.
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "24px" }}>
+              <button
+                type="button"
+                onClick={() => setDeleteModal({ open: false, chatId: null, chatName: "" })}
+                style={{
+                  padding: "9px 18px",
+                  background: "transparent",
+                  border: `1px solid ${C.border}`,
+                  color: C.textMuted,
+                  fontFamily: "'Cinzel', serif",
+                  fontSize: "11px",
+                  letterSpacing: "0.18em",
+                  cursor: "pointer",
+                }}
+              >CANCEL</button>
+              <button
+                type="button"
+                onClick={confirmDeleteChat}
+                style={{
+                  padding: "9px 18px",
+                  background: "transparent",
+                  border: "1px solid #c8503a",
+                  color: "#c8503a",
+                  fontFamily: "'Cinzel', serif",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  letterSpacing: "0.22em",
+                  cursor: "pointer",
+                }}
+              >DELETE</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
