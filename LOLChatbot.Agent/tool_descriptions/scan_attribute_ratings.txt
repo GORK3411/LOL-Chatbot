@@ -1,0 +1,18 @@
+Compares an attribute rating across all champions and returns results filtered or ordered as requested.
+Call this when the user wants to compare or find champions by attribute ratings — e.g.,
+"most mobile champions", "top 3 by damage rating", "champions with control above 2",
+"hardest champions to play", "high utility supports".
+Do NOT use for a single champion — use get_champion_info with fields=["attributeRatings"] instead.
+
+Attribute rating scale: 0–3 for damage, toughness, control, mobility, utility, difficulty;
+0–100 for abilityReliance (how much the champion relies on abilities vs. basic attacks).
+
+Parameters:
+- attribute: one of damage, toughness, control, mobility, utility, difficulty, abilityReliance
+- order: "highest", "lowest", or null/None (when filtering only by min/max without sorting)
+- limit: number of results to return
+- min_value: optional inclusive lower bound (e.g., 2 to find champions with rating >= 2)
+- max_value: optional inclusive upper bound
+- filters: optional dict to narrow the pool, e.g. {"role": "FIGHTER"} or {"position": "TOP"}
+
+Returns a list of {name, value} dicts.

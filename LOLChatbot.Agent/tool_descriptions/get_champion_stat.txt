@@ -1,0 +1,14 @@
+Returns one base stat value for a single champion, computed at a specific level.
+Call this when the user asks about a champion's specific stat — e.g., "what is Warwick's health at level 6?",
+"how much base armor does Garen have?", "what is Ahri's attack speed at level 1?".
+For comparing a stat across multiple champions, use scan_stats instead.
+
+Parameters:
+- name: PascalCase champion key, e.g. "Warwick", "Ahri", "MissFortune"
+- stat_name: one of health, mana, armor, magicResistance, attackDamage, attackSpeed, movespeed,
+  attackRange, healthRegen, manaRegen, criticalStrikeDamage, criticalStrikeDamageModifier
+- at_level: integer 1–18 (default 1)
+
+Returns a single number.
+Formula: flat + perLevel * (level - 1) for most stats.
+attackSpeed uses flat * (1 + perLevel * (level - 1) / 100) because perLevel is a percent bonus.

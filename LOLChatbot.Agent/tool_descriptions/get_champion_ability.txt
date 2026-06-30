@@ -1,0 +1,40 @@
+Returns detailed data for one ability of a League of Legends champion.
+slot must be one of: 'P' (passive), 'Q', 'W', 'E', 'R'.
+Use this whenever the user asks about a specific ability or spell.
+The `champion_name` argument must be the champion's key exactly as it
+appears in the file name, e.g. 'Warwick', 'Ahri', 'MissFortune'.
+Do not use for general playstyle or role questions — use get_champion_info instead.
+Do not use for base-stats questions — use get_champion_stat instead.
+
+How to read a champion's abilities:
+champion.abilities.{P|Q|W|E|R}[] (ability)
+├── name
+├── icon
+├── effects[]
+│   ├── description
+│   └── leveling[]            // empty = ability doesn't scale with champion level
+│       ├── attribute
+│       └── modifiers[]
+│           ├── values[]      // length 5 = scales with ability rank
+│           │                 // length 18 = scales with champion level
+│           │                 // length 0 = flat, doesn't scale
+│           └── units[]       // parallel to values; null entry = flat value
+├── cost
+│   └── modifiers[]           // same shape as leveling.modifiers
+└── cooldown
+    ├── modifiers[]           // same shape as leveling.modifiers
+    └── affectedByCdr (bool)
+
+Notes:
+
+- the entire description of an ability is the concatenation of all effects[].description.
+- leveling[].attribute: the name of the attribute the modifiers affect (e.g., damage, movement speed, range).
+- leveling[].modifiers[].values[]: an array of values that represent the change of the attribute. If the array is of length 5, this means that the value changes with ability level. If it is of length 18, this means that the value changes with champion level. If the array is of length 0, the value is flat and doesn't scale.
+- leveling[].modifiers[].units[]: parallel array to values[]. Each entry in units[] corresponds to the entry at the same index in values[]. A null entry means that value is a flat value (no ratio). For example %AD means that the effect is a percentage of the champion's total attack damage.
+- A single effect can have multiple modifiers (e.g., Warwick Q deals AD damage + %max HP damage). Always iterate all modifiers, not just the first.
+- cost.modifiers[] represents the ability's mana (or other resource) cost per ability rank. cooldown.modifiers[] represents the cooldown in seconds per ability rank.
+- The rest of the fields that were not explicitly described are clear and self-explanatory.
+- Null in units[] means the value is flat (no ratio) — this is meaningful, not missing data. Null elsewhere means the field is absent and can be ignored.
+- when asking about the ratio of an ability, you should look for the leveling[].modifiers[] array. The ratio is represented by the leveling[].modifiers[].units[] property. If the units property is null, it means that the effect is a flat value and does not have a ratio.
+for example: leblanc W Damage scale with 70% AP.
+Other example: Warwick Q Damage scale with 120% total AD + 6/7/8/9/10% of the target's maximum health.

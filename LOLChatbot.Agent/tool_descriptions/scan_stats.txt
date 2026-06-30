@@ -1,0 +1,44 @@
+Compares a base stat across all champions and returns the top results ordered highest or lowest.
+Do NOT use for a single champion — use get_champion_stat instead.
+
+Parameters:
+- stat_name: one of health, mana, armor, magicResistance, attackDamage, attackSpeed, movespeed,
+  attackRange, healthRegen, manaRegen, criticalStrikeDamage, criticalStrikeDamageModifier
+- order: "highest" or "lowest"
+- limit: number of results to return (e.g., 5 for top 5)
+- offset: number of results to skip from the start, for pagination (default 0).
+  Use when the user asks for "more" results after a previous scan_stats call — pass the cumulative count of results already shown.
+- at_level: champion level to compute the stat at (1–18, default 1)
+- min_value: optional inclusive lower bound on the computed stat value ("at least", "X or more")
+- max_value: optional inclusive upper bound on the computed stat value ("at most", "X or less")
+  To match an exact value, set both min_value and max_value to the same number.
+- min_exclusive: optional exclusive lower bound ("more than", "greater than", "above")
+- max_exclusive: optional exclusive upper bound ("less than", "lower than", "below", "under")
+- filters: optional dict to narrow the champion pool, e.g. {"role": "FIGHTER"} or {"position": "TOP"}
+  Valid role values: FIGHTER, TANK, MAGE, ASSASSIN, SUPPORT, MARKSMAN, DIVER, ENCHANTER, BURST, POKE, WARDEN, SKIRMISHER, SPECIALIST, CATCHER
+  Valid position values: TOP, JUNGLE, MID, BOTTOM, SUPPORT
+
+For a single bound, pass either the inclusive or the exclusive variant — not both.
+Pick based on the user's wording: "less than 150" → max_exclusive=150; "150 or less" → max_value=150.
+
+Examples:
+- "Who has the highest base health?"
+    → stat_name="health", order="highest", limit=1
+- "Top 5 champions by armor at level 18"
+    → stat_name="armor", order="highest", limit=5, at_level=18
+- "Champions with the lowest attack speed"
+    → stat_name="attackSpeed", order="lowest", limit=5
+- "Which jungle fighter has the most health at level 6?"
+    → stat_name="health", order="highest", limit=1, at_level=6,
+      filters={"position": "JUNGLE", "role": "FIGHTER"}
+- "Champions with attack range of 125"
+    → stat_name="attackRange", order="highest", limit=10, min_value=125, max_value=125
+- "Champions with base AD between 50 and 60"
+    → stat_name="attackDamage", order="highest", limit=10, min_value=50, max_value=60
+- "Give me 7 champions with attack range lower than 175"
+    → stat_name="attackRange", order="lowest", limit=7, max_exclusive=175
+- "Champions with more than 60 base AD"
+    → stat_name="attackDamage", order="highest", limit=10, min_exclusive=60
+- After "Give me 5 champions with attack range less than 1000 health", if the user says "Give me 5 more"
+    → stat_name="health", order="lowest", limit=5, max_exclusive=150, offset=5
+Returns a list of {name, value} dicts ordered as requested.

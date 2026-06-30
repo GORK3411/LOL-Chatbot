@@ -1,0 +1,13 @@
+Returns specific metadata fields for a single League of Legends champion.
+Call this when the user asks about a champion's general identity — positions, roles, adaptive type,
+resource type, lore, attribute ratings (damage/toughness/control/mobility/utility/difficulty/abilityReliance),
+or champion id/title.
+Do NOT call for base stats (use get_champion_stat), ability details (use get_champion_ability),
+or skins (use get_champion_skins).
+
+Parameters:
+- name: PascalCase champion key, e.g. "Warwick", "Ahri", "MissFortune", "AurelionSol"
+- fields: list of field names to return.
+  Allowed values: positions, roles, adaptiveType, resource, lore, attributeRatings, key, id, title
+
+Returns a dict containing only the requested fields.
