@@ -24,6 +24,29 @@ def load_data(use_remote: bool) -> dict:
             return json.load(f)
 
 
+def _coerce(value):
+    if isinstance(value, str):
+        if value.lower() == "true":
+            return True
+        if value.lower() == "false":
+            return False
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    return value
+
+
+def _clean_ability(ability: dict) -> dict:
+    return {k: _coerce(v) for k, v in ability.items() if v is not None}
+
+
+def _clean_champion(champion: dict) -> dict:
+    cleaned_abilities = {
+        slot: [_clean_ability(ab) for ab in ab_list]
+        for slot, ab_list in champion.get("abilities", {}).items()
+    }
+    return {**champion, "abilities": cleaned_abilities}
+
+
 def seed(use_remote: bool = False):
     data = load_data(use_remote)
 
@@ -31,7 +54,7 @@ def seed(use_remote: bool = False):
     collection = client[DB_NAME][COLLECTION]
 
     ops = [
-        UpdateOne({"id": champion["id"]}, {"$set": champion}, upsert=True)
+        UpdateOne({"id": champion["id"]}, {"$set": _clean_champion(champion)}, upsert=True)
         for champion in data.values()
     ]
 
