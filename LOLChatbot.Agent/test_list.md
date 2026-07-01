@@ -18,6 +18,7 @@ Test 3:
 - What are the 5 champions with the highest base attack damage?
 - What are the 5 champions with the lowest base attack damage?
 - What are the 5 champions with the highest base health?
+- What are the 5 champions with the highest base health at level 18?
 
 ## Champions abilities
 

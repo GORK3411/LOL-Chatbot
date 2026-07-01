@@ -57,6 +57,31 @@ class AttributeRating(str, Enum):
     abilityReliance = "abilityReliance"
 
 
+class Role(str, Enum):
+    FIGHTER = "FIGHTER"
+    TANK = "TANK"
+    MAGE = "MAGE"
+    ASSASSIN = "ASSASSIN"
+    SUPPORT = "SUPPORT"
+    MARKSMAN = "MARKSMAN"
+    DIVER = "DIVER"
+    ENCHANTER = "ENCHANTER"
+    BURST = "BURST"
+    POKE = "POKE"
+    WARDEN = "WARDEN"
+    SKIRMISHER = "SKIRMISHER"
+    SPECIALIST = "SPECIALIST"
+    CATCHER = "CATCHER"
+
+
+class Position(str, Enum):
+    TOP = "TOP"
+    JUNGLE = "JUNGLE"
+    MID = "MID"
+    BOTTOM = "BOTTOM"
+    SUPPORT = "SUPPORT"
+
+
 def _load_champion(name: str) -> dict:
     doc = _champions.find_one({"key": name}, {"_id": 0})
     if doc is None:
@@ -126,9 +151,12 @@ def scan_stats(
     max_value: Optional[float] = None,
     min_exclusive: Optional[float] = None,
     max_exclusive: Optional[float] = None,
-    filters: Optional[dict] = None,
+    roles: Optional[list[Role]] = None,
+    roles_mode: Literal["any", "all"] = "any",
+    positions: Optional[list[Position]] = None,
+    positions_mode: Literal["any", "all"] = "any",
 ) -> list:
-    print(f"[tool] scan_stats(stat_name={stat_name!r}, order={order!r}, limit={limit!r}, offset={offset!r}, at_level={at_level!r}, min_value={min_value!r}, max_value={max_value!r}, min_exclusive={min_exclusive!r}, max_exclusive={max_exclusive!r}, filters={filters!r})")
+    print(f"[tool] scan_stats(stat_name={stat_name!r}, order={order!r}, limit={limit!r}, offset={offset!r}, at_level={at_level!r}, min_value={min_value!r}, max_value={max_value!r}, min_exclusive={min_exclusive!r}, max_exclusive={max_exclusive!r}, roles={roles!r}, roles_mode={roles_mode!r}, positions={positions!r}, positions_mode={positions_mode!r})")
     if order not in ("highest", "lowest"):
         print(f"{_RED}order must be 'highest' or 'lowest', got '{order}'{_RESET}")
         return []
@@ -136,7 +164,13 @@ def scan_stats(
         print(f"{_RED}at_level must be 1–18, got {at_level}{_RESET}")
         return []
 
-    query = _build_mongo_filter(filters)
+    query: dict = {}
+    if roles:
+        op = "$all" if roles_mode == "all" else "$in"
+        query["roles"] = {op: [r.value for r in roles]}
+    if positions:
+        op = "$all" if positions_mode == "all" else "$in"
+        query["positions"] = {op: [p.value for p in positions]}
     docs = list(_champions.find(query, {"_id": 0, "key": 1, f"stats.{stat_name.value}": 1}))
     results = []
     for doc in docs:

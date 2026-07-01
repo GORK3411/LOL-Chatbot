@@ -14,9 +14,20 @@ Parameters:
   To match an exact value, set both min_value and max_value to the same number.
 - min_exclusive: optional exclusive lower bound ("more than", "greater than", "above")
 - max_exclusive: optional exclusive upper bound ("less than", "lower than", "below", "under")
-- filters: optional dict to narrow the champion pool, e.g. {"role": "FIGHTER"} or {"position": "TOP"}
-  Valid role values: FIGHTER, TANK, MAGE, ASSASSIN, SUPPORT, MARKSMAN, DIVER, ENCHANTER, BURST, POKE, WARDEN, SKIRMISHER, SPECIALIST, CATCHER
-  Valid position values: TOP, JUNGLE, MID, BOTTOM, SUPPORT
+- roles: optional list of roles to narrow the champion pool.
+  Valid values: FIGHTER, TANK, MAGE, ASSASSIN, SUPPORT, MARKSMAN, DIVER, ENCHANTER, BURST, POKE, WARDEN, SKIRMISHER, SPECIALIST, CATCHER
+  Example: ["FIGHTER", "TANK"]
+- roles_mode: "any" (default) or "all".
+  "any" — champion matches if it has at least one of the given roles ("fighters or tanks" → roles_mode="any").
+  "all" — champion matches only if it has every given role ("both fighter and tank" → roles_mode="all").
+  Ignored when roles is None or empty.
+- positions: optional list of positions to narrow the champion pool.
+  Valid values: TOP, JUNGLE, MID, BOTTOM, SUPPORT
+  Example: ["TOP", "JUNGLE"]
+- positions_mode: "any" (default) or "all".
+  "any" — champion matches if it plays in at least one of the given positions ("top or jungle" → positions_mode="any").
+  "all" — champion matches only if it plays in every given position ("both top and jungle" → positions_mode="all").
+  Ignored when positions is None or empty.
 
 For a single bound, pass either the inclusive or the exclusive variant — not both.
 Pick based on the user's wording: "less than 150" → max_exclusive=150; "150 or less" → max_value=150.
@@ -30,7 +41,7 @@ Examples:
     → stat_name="attackSpeed", order="lowest", limit=5
 - "Which jungle fighter has the most health at level 6?"
     → stat_name="health", order="highest", limit=1, at_level=6,
-      filters={"position": "JUNGLE", "role": "FIGHTER"}
+      roles=["FIGHTER"], positions=["JUNGLE"]
 - "Champions with attack range of 125"
     → stat_name="attackRange", order="highest", limit=10, min_value=125, max_value=125
 - "Champions with base AD between 50 and 60"
