@@ -18,12 +18,12 @@ namespace LOLChatbot.Api.Repositories
             return await chats.Find(chat => chat.Id == id).FirstOrDefaultAsync();
         }
 
-        public async Task<Chat> CreateChatAsync(string chatName)
+        public async Task<Chat> CreateChatAsync(string chatName, string userId)
         {
             var chat = new Chat
             {
                 ChatName = chatName,
-                UserId = "user-1",
+                UserId = userId,
                 LastUpdate = DateTime.UtcNow
             };
 
@@ -42,10 +42,11 @@ namespace LOLChatbot.Api.Repositories
             return await chats.Find(chat => chat.UserId == userId).ToListAsync();
         }
 
-        public async Task<bool> AddMessageToChatAsync(string chatId, string message)
+        public async Task<bool> AddMessageToChatAsync(string chatId, MessageRole role, string content)
         {
+            var msg = new Message { Role = role, Content = content };
             var update = Builders<Chat>.Update
-                .Push(chat => chat.Messages, message)
+                .Push(chat => chat.Messages, msg)
                 .Set(chat => chat.LastUpdate, DateTime.UtcNow);
             var result = await chats.UpdateOneAsync(chat => chat.Id == chatId, update);
             return result.ModifiedCount > 0;

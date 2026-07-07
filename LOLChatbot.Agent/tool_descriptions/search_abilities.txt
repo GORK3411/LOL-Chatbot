@@ -1,0 +1,17 @@
+Searches champion abilities by semantic similarity to a natural-language description and returns matching ability metadata.
+Use this when the user describes what an ability does rather than naming it directly — e.g. "an ability that pulls enemies", "a dash that heals", "a global ultimate".
+For structured filters (slot, cooldown, damage type, etc.) use scan_abilities instead.
+
+Each result contains: champion (champion key), slot ("P"/"Q"/"W"/"E"/"R"), ability_name.
+
+Parameters:
+- query: natural-language description of the ability behaviour to search for (required).
+- limit: number of results to return (default 5).
+
+Examples:
+- "Which abilities pull enemies toward the caster?"
+    → query="pulls enemies toward the caster", limit=5
+- "Find an ultimate that revives the champion on death"
+    → query="revives on death", limit=3
+- "Show me abilities that summon clones or copies"
+    → query="summons a clone or copy of the champion", limit=5

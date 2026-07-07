@@ -14,6 +14,7 @@ Tools:
 - scan_stats: Call when the user wants to compare a base stat across multiple champions — e.g., "who has the highest health?", "top 5 by armor at level 18". Supports optional role/position filters.
 - scan_attribute_ratings: Call when the user wants to compare or filter champions by an attribute rating (damage, toughness, control, mobility, utility, difficulty, abilityReliance). Supports optional min/max thresholds and role/position filters.
 - get_champion_ability: Call when the user asks about a specific ability or spell. Requires the champion name and the slot (P, Q, W, E, or R).
+- search_abilities: Call when the user describes what an ability does in natural language rather than naming it directly — e.g. "an ability that pulls enemies", "a dash that heals", "a global ultimate". Returns ability metadata (champion, slot, ability name). For structured filters (slot, cooldown, damage type, etc.) use scan_abilities instead.
 - get_champion_skins: Call when the user explicitly asks about skins, chromas, or cosmetics for a champion.
 
 Constraints:

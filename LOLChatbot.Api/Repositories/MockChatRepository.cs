@@ -13,12 +13,12 @@ namespace LOLChatbot.Api.Repositories
                 Id = ObjectId.GenerateNewId().ToString(),
                 ChatName = "General tips",
                 UserId = "user-1",
-                Messages = new List<string>
+                Messages = new List<Message>
                 {
-                    "Ask me about champions, builds, or lane matchups.",
-                    "What's a good build for Ahri?",
-                    "She excels in the mid lane with mobility.",
-                    "You can rush Luden's Echo for damage."
+                    new() { Role = MessageRole.Assistant, Content = "Ask me about champions, builds, or lane matchups." },
+                    new() { Role = MessageRole.User,      Content = "What's a good build for Ahri?" },
+                    new() { Role = MessageRole.Assistant, Content = "She excels in the mid lane with mobility." },
+                    new() { Role = MessageRole.Assistant, Content = "You can rush Luden's Echo for damage." },
                 },
                 LastUpdate = DateTime.UtcNow
             },
@@ -27,14 +27,14 @@ namespace LOLChatbot.Api.Repositories
                 Id = ObjectId.GenerateNewId().ToString(),
                 ChatName = "Ranked prep",
                 UserId = "user-1",
-                Messages = new List<string>
+                Messages = new List<Message>
                 {
-                    "Try to lock in a comfort pick and a simple game plan.",
-                    "I'm thinking of playing Garen top.",
-                    "Garen is solid for climbing. Focus on farming.",
-                    "What about his matchups against Darius?",
-                    "Play it safe early and scale into teamfights.",
-                    "Thanks for the tips!"
+                    new() { Role = MessageRole.Assistant, Content = "Try to lock in a comfort pick and a simple game plan." },
+                    new() { Role = MessageRole.User,      Content = "I'm thinking of playing Garen top." },
+                    new() { Role = MessageRole.Assistant, Content = "Garen is solid for climbing. Focus on farming." },
+                    new() { Role = MessageRole.User,      Content = "What about his matchups against Darius?" },
+                    new() { Role = MessageRole.Assistant, Content = "Play it safe early and scale into teamfights." },
+                    new() { Role = MessageRole.User,      Content = "Thanks for the tips!" },
                 },
                 LastUpdate = DateTime.UtcNow
             },
@@ -43,17 +43,17 @@ namespace LOLChatbot.Api.Repositories
                 Id = ObjectId.GenerateNewId().ToString(),
                 ChatName = "Support strategies",
                 UserId = "user-1",
-                Messages = new List<string>
+                Messages = new List<Message>
                 {
-                    "What's the best support for this meta?",
-                    "Thresh and Leona are always meta picks.",
-                    "What about Janna?",
-                    "Janna is great for peel and utility.",
-                    "Her shield provides good protection.",
-                    "Should I focus on warding?",
-                    "Absolutely, vision control is crucial.",
-                    "Thanks!",
-                    "Good luck in ranked!"
+                    new() { Role = MessageRole.User,      Content = "What's the best support for this meta?" },
+                    new() { Role = MessageRole.Assistant, Content = "Thresh and Leona are always meta picks." },
+                    new() { Role = MessageRole.User,      Content = "What about Janna?" },
+                    new() { Role = MessageRole.Assistant, Content = "Janna is great for peel and utility." },
+                    new() { Role = MessageRole.Assistant, Content = "Her shield provides good protection." },
+                    new() { Role = MessageRole.User,      Content = "Should I focus on warding?" },
+                    new() { Role = MessageRole.Assistant, Content = "Absolutely, vision control is crucial." },
+                    new() { Role = MessageRole.User,      Content = "Thanks!" },
+                    new() { Role = MessageRole.Assistant, Content = "Good luck in ranked!" },
                 },
                 LastUpdate = DateTime.UtcNow
             },
@@ -63,15 +63,15 @@ namespace LOLChatbot.Api.Repositories
                 Id = ObjectId.GenerateNewId().ToString(),
                 ChatName = "ADC guides",
                 UserId = "user-2",
-                Messages = new List<string>
+                Messages = new List<Message>
                 {
-                    "I want to learn ADC. What champions should I play?",
-                    "Jinx and Ashe are beginner-friendly ADCs.",
-                    "What about Caitlyn?",
-                    "Caitlyn has great range and poke damage.",
-                    "How do I position in teamfights?",
-                    "Stay behind your team and focus the closest enemy.",
-                    "What's the build path?"
+                    new() { Role = MessageRole.User,      Content = "I want to learn ADC. What champions should I play?" },
+                    new() { Role = MessageRole.Assistant, Content = "Jinx and Ashe are beginner-friendly ADCs." },
+                    new() { Role = MessageRole.User,      Content = "What about Caitlyn?" },
+                    new() { Role = MessageRole.Assistant, Content = "Caitlyn has great range and poke damage." },
+                    new() { Role = MessageRole.User,      Content = "How do I position in teamfights?" },
+                    new() { Role = MessageRole.Assistant, Content = "Stay behind your team and focus the closest enemy." },
+                    new() { Role = MessageRole.User,      Content = "What's the build path?" },
                 },
                 LastUpdate = DateTime.UtcNow
             },
@@ -80,18 +80,18 @@ namespace LOLChatbot.Api.Repositories
                 Id = ObjectId.GenerateNewId().ToString(),
                 ChatName = "Jungle pathing",
                 UserId = "user-2",
-                Messages = new List<string>
+                Messages = new List<Message>
                 {
-                    "How do I path efficiently as Lee Sin?",
-                    "Start Krugs, then Raptors, then Wolves.",
-                    "Should I full clear or gank early?",
-                    "It depends on your team's lane pressure.",
-                    "Where's the best place to ward?",
-                    "Ward river entrances and enemy buffs.",
-                    "What's the optimal build?",
-                    "Trinity Force into Black Cleaver works well.",
-                    "Thanks for the help!",
-                    "Good luck!"
+                    new() { Role = MessageRole.User,      Content = "How do I path efficiently as Lee Sin?" },
+                    new() { Role = MessageRole.Assistant, Content = "Start Krugs, then Raptors, then Wolves." },
+                    new() { Role = MessageRole.User,      Content = "Should I full clear or gank early?" },
+                    new() { Role = MessageRole.Assistant, Content = "It depends on your team's lane pressure." },
+                    new() { Role = MessageRole.User,      Content = "Where's the best place to ward?" },
+                    new() { Role = MessageRole.Assistant, Content = "Ward river entrances and enemy buffs." },
+                    new() { Role = MessageRole.User,      Content = "What's the optimal build?" },
+                    new() { Role = MessageRole.Assistant, Content = "Trinity Force into Black Cleaver works well." },
+                    new() { Role = MessageRole.User,      Content = "Thanks for the help!" },
+                    new() { Role = MessageRole.Assistant, Content = "Good luck!" },
                 },
                 LastUpdate = DateTime.UtcNow
             }
@@ -107,14 +107,14 @@ namespace LOLChatbot.Api.Repositories
             }
         }
 
-        public Task<Chat> CreateChatAsync(string chatName)
+        public Task<Chat> CreateChatAsync(string chatName, string userId)
         {
             var chat = new Chat
             {
                 Id = ObjectId.GenerateNewId().ToString(),
                 ChatName = chatName,
-                UserId = "user-1",
-                Messages = new List<string>(),
+                UserId = userId,
+                Messages = new List<Message>(),
                 LastUpdate = DateTime.UtcNow
             };
 
@@ -131,10 +131,7 @@ namespace LOLChatbot.Api.Repositories
             lock (syncRoot)
             {
                 var chat = chats.FirstOrDefault(item => item.Id == id);
-                if (chat == null)
-                {
-                    return Task.FromResult(false);
-                }
+                if (chat == null) return Task.FromResult(false);
 
                 chats.Remove(chat);
                 return Task.FromResult(true);
@@ -149,17 +146,14 @@ namespace LOLChatbot.Api.Repositories
             }
         }
 
-        public Task<bool> AddMessageToChatAsync(string chatId, string message)
+        public Task<bool> AddMessageToChatAsync(string chatId, MessageRole role, string content)
         {
             lock (syncRoot)
             {
                 var chat = chats.FirstOrDefault(item => item.Id == chatId);
-                if (chat == null)
-                {
-                    return Task.FromResult(false);
-                }
+                if (chat == null) return Task.FromResult(false);
 
-                chat.Messages.Add(message);
+                chat.Messages.Add(new Message { Role = role, Content = content });
                 chat.LastUpdate = DateTime.UtcNow;
                 return Task.FromResult(true);
             }
@@ -170,10 +164,7 @@ namespace LOLChatbot.Api.Repositories
             lock (syncRoot)
             {
                 var chat = chats.FirstOrDefault(item => item.Id == id);
-                if (chat == null)
-                {
-                    return Task.FromResult(false);
-                }
+                if (chat == null) return Task.FromResult(false);
 
                 chat.ChatName = newName;
                 chat.LastUpdate = DateTime.UtcNow;

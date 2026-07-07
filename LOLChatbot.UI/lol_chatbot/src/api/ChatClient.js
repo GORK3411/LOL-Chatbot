@@ -31,8 +31,8 @@ export function deleteChat(id) {
   });
 }
 
-export function getChatsByUserId(userId) {
-  return apiRequest(`/api/chat/user/${userId}`, {
+export function getMyChats() {
+  return apiRequest("/api/chat/user", {
     method: "GET",
   });
 }

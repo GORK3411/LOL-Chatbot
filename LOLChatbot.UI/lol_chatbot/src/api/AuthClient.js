@@ -25,6 +25,18 @@ export function logout() {
   localStorage.removeItem("token");
 }
 
+export function getUserId() {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+  try {
+    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(base64));
+    return payload["nameid"] ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function testAuth() {
   return apiRequest("/api/auth/test", {
     method: "GET",

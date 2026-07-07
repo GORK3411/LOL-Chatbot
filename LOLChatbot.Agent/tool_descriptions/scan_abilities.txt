@@ -1,0 +1,72 @@
+Scans abilities across all champions and returns a paginated list of results.
+Use this when the user asks about abilities from multiple champions (e.g., "show me some Q abilities", "which champions have a targeted passive?").
+For a single champion's ability use get_champion_ability instead.
+
+Each result has: champion_name, slot ("P"/"Q"/"W"/"E"/"R"), and ability (array of ability objects for that slot).
+
+Parameters — pagination / output shape:
+- limit: number of (champion, slot) results to return (default 1)
+- offset: results to skip before returning, for pagination (default 0).
+  Use when the user asks for "more" after a prior call — pass the cumulative count already shown.
+- fields: list of ability fields to include in each returned object.
+  When omitted the full object is returned.
+  Valid values: name, icon, effects, cost, cooldown, targeting, affects, spellshieldable,
+  resource, damageType, spellEffects, projectile, onHitEffects, occurrence, notes, blurb,
+  missileSpeed, rechargeRate, collisionRadius, tetherRadius, onTargetCdStatic, innerRadius,
+  speed, width, angle, castTime, effectRadius, targetRange
+
+Parameters — slot filter:
+- slot: filter to a specific ability slot. One of: P, Q, W, E, R. Omit to include all slots.
+
+Parameters — enum / bool equality filters:
+- targeting: filter by how the ability is aimed.
+  Valid values: Passive, Unit, Direction, Auto, Location, Vector, Varied, N/A
+  Uses substring matching — "Unit" matches "Unit", "Unit / Auto", "Auto / Unit", etc.
+- affects: filter by who the ability affects.
+  Valid values: Self, Enemies, Allies, Monsters, None
+  Uses substring matching — "Enemies" matches "Enemies", "Allies, Enemies", "Enemies, Self", etc.
+- damage_type: exact match on the ability damage type.
+  Valid values: MAGIC_DAMAGE, PHYSICAL_DAMAGE, TRUE_DAMAGE, MIXED_DAMAGE, OTHER_DAMAGE
+- resource: exact match on the ability's resource cost type.
+  Valid values: MANA, ENERGY, HEALTH, CURRENT_HEALTH, MAXIMUM_HEALTH, FURY, GRIT, CHARGE, MANA_PER_SECOND, OTHER
+- spellshieldable: true → only abilities a spell shield can block; false → only those it cannot.
+  Abilities with "Special" or unknown spellshield behaviour are excluded by either value.
+- projectile: true → only projectile abilities; false → only non-projectile.
+  Abilities with "Special" projectile behaviour are excluded by either value.
+
+Parameters — numeric range filters (require at_rank to evaluate per-rank values):
+- at_rank: controls how cooldown and cost filters are evaluated. Default 1.
+  Pass an int 1–5 for a specific rank, or "any" to match if the numeric bound is satisfied at any rank of the ability.
+  Use "any" for queries like "abilities that ever hit a 5s cooldown".
+  Use a specific rank for queries like "abilities with a 5s cooldown at max rank" (at_rank=5).
+  Note that ultimates have only 3 ranks, so at_rank=4 or at_rank=5 will exclude ultimates.
+  at_rank has no effect on enum, bool, slot, or name_contains filters.
+- cooldown_min / cooldown_max: inclusive bounds on cooldown in seconds.
+- cooldown_min_exclusive / cooldown_max_exclusive: exclusive bounds on cooldown.
+- cost_min / cost_max: inclusive bounds on ability cost.
+- cost_min_exclusive / cost_max_exclusive: exclusive bounds on ability cost.
+  For a single bound use either the inclusive or exclusive variant, not both.
+  Abilities with null cooldown / cost are excluded when any cooldown / cost filter is active.
+
+Parameters — text filter:
+- name_contains: case-insensitive substring match on the ability name.
+
+Examples:
+- "Show me 3 Q abilities"
+    → slot="Q", limit=3
+- "Give me the name and cooldown of 5 ultimates"
+    → slot="R", limit=5, fields=["name", "cooldown"]
+- "Show me more Q abilities" (after a prior call with limit=3)
+    → slot="Q", limit=3, offset=3
+- "Give me 10 passive ability blurbs"
+    → slot="P", limit=10, fields=["name", "blurb"]
+- "Which champions have a targeted ability that deals magic damage?"
+    → targeting="Unit", damage_type="MAGIC_DAMAGE", limit=10
+- "Show me mana-costing ultimates with cooldown under 100 seconds at rank 1"
+    → slot="R", resource="MANA", cooldown_max_exclusive=100, at_rank=1, limit=10
+- "Abilities that ever hit a 5-second cooldown at any rank"
+    → cooldown_min=5, cooldown_max=5, at_rank="any", limit=10
+- "Q abilities with cooldown under 4s at max rank"
+    → slot="Q", cooldown_max_exclusive=4, at_rank=5, limit=10
+- "Find abilities whose name contains 'strike'"
+    → name_contains="strike", limit=10

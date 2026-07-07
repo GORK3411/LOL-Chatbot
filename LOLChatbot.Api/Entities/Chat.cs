@@ -13,7 +13,7 @@ namespace LOLChatbot.Api.Entities
 
         public string UserId { get; set; } = string.Empty;
 
-        public List<string> Messages { get; set; } = new();
+        public List<Message> Messages { get; set; } = new();
         public DateTime LastUpdate { get; set; }
     }
 }
