@@ -13,6 +13,7 @@ import SearchIcon from "../components/icons/SearchIcon";
 import HexAvatar from "../components/icons/HexAvatar";
 import Modal from "../components/Modal";
 import HexPulseLoader from "../components/HexPulseLoader";
+import FracturedSigilError from "../components/FracturedSigilError";
 import { C } from "../constants/theme";
 
 
@@ -93,6 +94,7 @@ export default function ChatPage() {
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [inputText, setInputText] = useState("");
   const [isAwaitingResponse, setIsAwaitingResponse] = useState(false);
+  const [failedMessageText, setFailedMessageText] = useState(null);
   const [hoveredChatId, setHoveredChatId] = useState(null);
   const [newChatModal, setNewChatModal] = useState({ open: false, value: "" });
   const [deleteModal, setDeleteModal] = useState({
@@ -120,7 +122,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isAwaitingResponse]);
+  }, [messages, isAwaitingResponse, failedMessageText]);
 
   useEffect(() => {
     getMyChats()
@@ -136,6 +138,7 @@ export default function ChatPage() {
   const handleChatClick = async (chatId) => {
     try {
       setSelectedChatId(chatId);
+      setFailedMessageText(null);
       const chat = await getChatById(chatId);
       console.log(chat);
       setMessages(
@@ -217,6 +220,7 @@ export default function ChatPage() {
     if (!text || !selectedChatId) return;
     setMessages((prev) => [...prev, { text, isUser: true }]);
     setInputText("");
+    setFailedMessageText(null);
     setIsAwaitingResponse(true);
     try {
       const reply = await addMessageToChat(selectedChatId, text);
@@ -224,9 +228,28 @@ export default function ChatPage() {
       setMessages((prev) => [...prev, { text: reply, isUser: false }]);
     } catch (error) {
       setIsAwaitingResponse(false);
+      setFailedMessageText(text);
       console.error("Failed to send message:", error);
     }
   };
+
+  const handleRetry = async () => {
+    const text = failedMessageText;
+    if (!text || !selectedChatId) return;
+    setFailedMessageText(null);
+    setIsAwaitingResponse(true);
+    try {
+      const reply = await addMessageToChat(selectedChatId, text);
+      setIsAwaitingResponse(false);
+      setMessages((prev) => [...prev, { text: reply, isUser: false }]);
+    } catch (error) {
+      setIsAwaitingResponse(false);
+      setFailedMessageText(text);
+      console.error("Failed to send message:", error);
+    }
+  };
+
+  const handleDismissError = () => setFailedMessageText(null);
 
   const visibleChats = chats
     .slice()
@@ -586,6 +609,9 @@ export default function ChatPage() {
                 <ChatMessage key={i} message={msg.text} isUser={msg.isUser} />
               ))}
               {isAwaitingResponse && <HexPulseLoader />}
+              {!isAwaitingResponse && failedMessageText && (
+                <FracturedSigilError onRetry={handleRetry} onDismiss={handleDismissError} />
+              )}
               <div ref={messagesEndRef} />
             </div>
 
