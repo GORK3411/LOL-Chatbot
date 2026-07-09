@@ -75,3 +75,77 @@ body {
 .hex-btn-social:hover {
   border-color: #c8aa6e;
 }
+
+.hex-btn-secondary {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  color: #c8aa6e;
+  border: 1px solid #c8aa6e;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.hex-btn-secondary:hover:not(:disabled) {
+  background: rgba(200, 170, 110, 0.08);
+}
+
+.hex-btn-secondary:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+@keyframes seal-glow {
+  0%, 100% { opacity: 0.55; transform: scale(0.94); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes seal-rot {
+  to { transform: rotate(360deg); }
+}
+
+.seal-core {
+  animation: seal-glow 2.6s ease-in-out infinite;
+  transform-origin: 60px 60px;
+  transform-box: fill-box;
+}
+
+.seal-ring {
+  animation: seal-rot 24s linear infinite;
+  transform-origin: 60px 60px;
+  transform-box: fill-box;
+}
+
+@keyframes check-draw {
+  from { stroke-dashoffset: 40; }
+  to { stroke-dashoffset: 0; }
+}
+
+.check-mark {
+  stroke-dasharray: 40;
+  animation: check-draw 0.6s ease-out 0.2s both;
+}
+
+@keyframes seal-flicker {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.85; }
+}
+
+@keyframes crack-shift {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(1px); }
+}
+
+.seal-crack {
+  animation: seal-flicker 2.2s ease-in-out infinite;
+  transform-origin: 60px 60px;
+  transform-box: fill-box;
+}
+
+.seal-crack-line {
+  animation: crack-shift 2.2s ease-in-out infinite;
+}

@@ -19,6 +19,12 @@ namespace LOLChatbot.Api.Repositories
             return user;
         }
 
+        public async Task<bool> DeleteUser(string id)
+        {
+           return (await users.DeleteOneAsync(u => u.Id == id)).IsAcknowledged;
+
+        }
+
         public async Task<User?> GetUserByEmail(string email)
         {
             return await users.Find(u => u.Email == email).FirstOrDefaultAsync();
@@ -33,5 +39,13 @@ namespace LOLChatbot.Api.Repositories
         {
             return await users.Find(u => u.Username == username).FirstOrDefaultAsync();
         }
+
+        public async Task<User?> UpdateUserAsync(User user)
+        {
+            await users.ReplaceOneAsync(u => u.Id == user.Id, user);
+            return user;
+        }
+
+       
     }
 }

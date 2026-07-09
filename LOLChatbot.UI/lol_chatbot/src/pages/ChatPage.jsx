@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   addMessageToChat,
   createChat,
@@ -7,6 +8,7 @@ import {
   getMyChats,
   renameChat,
 } from "../api/ChatClient";
+import { logout } from "../api/AuthClient";
 import HexLogo from "../components/HexLogo";
 import DiamondDot from "../components/icons/DiamondDot";
 import SearchIcon from "../components/icons/SearchIcon";
@@ -15,8 +17,6 @@ import Modal from "../components/Modal";
 import HexPulseLoader from "../components/HexPulseLoader";
 import FracturedSigilError from "../components/FracturedSigilError";
 import { C } from "../constants/theme";
-
-
 
 function groupChatsByDate(chats) {
   const today = new Date();
@@ -88,6 +88,7 @@ function ChatMessage({ message, isUser }) {
 }
 
 export default function ChatPage() {
+  const navigate = useNavigate();
   const [chats, setChats] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [messages, setMessages] = useState([]);
@@ -251,6 +252,11 @@ export default function ChatPage() {
 
   const handleDismissError = () => setFailedMessageText(null);
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   const visibleChats = chats
     .slice()
     .sort((a, b) => new Date(b.lastUpdate) - new Date(a.lastUpdate))
@@ -326,22 +332,42 @@ export default function ChatPage() {
             style={{
               display: "flex",
               alignItems: "center",
+              justifyContent: "space-between",
               gap: "10px",
               marginBottom: "18px",
             }}
           >
-            <HexLogo size={22} />
-            <span
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <HexLogo size={22} />
+              <span
+                style={{
+                  fontFamily: "'Cinzel', serif",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: C.textLight,
+                  letterSpacing: "0.18em",
+                }}
+              >
+                ARCANE ATLAS
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Log out"
               style={{
+                background: "none",
+                border: `1px solid ${C.border}`,
+                color: C.textSubtle,
+                cursor: "pointer",
                 fontFamily: "'Cinzel', serif",
-                fontSize: "14px",
-                fontWeight: 600,
-                color: C.textLight,
-                letterSpacing: "0.18em",
+                fontSize: "10px",
+                letterSpacing: "0.14em",
+                padding: "5px 8px",
               }}
             >
-              ARCANE ATLAS
-            </span>
+              LOGOUT
+            </button>
           </div>
 
           <button
@@ -610,7 +636,10 @@ export default function ChatPage() {
               ))}
               {isAwaitingResponse && <HexPulseLoader />}
               {!isAwaitingResponse && failedMessageText && (
-                <FracturedSigilError onRetry={handleRetry} onDismiss={handleDismissError} />
+                <FracturedSigilError
+                  onRetry={handleRetry}
+                  onDismiss={handleDismissError}
+                />
               )}
               <div ref={messagesEndRef} />
             </div>
@@ -699,7 +728,9 @@ export default function ChatPage() {
       {renameModal.open && (
         <Modal
           title="RENAME SUMMONING"
-          onClose={() => setRenameModal({ open: false, chatId: null, value: "" })}
+          onClose={() =>
+            setRenameModal({ open: false, chatId: null, value: "" })
+          }
           onConfirm={submitRenameChat}
           confirmLabel="RENAME"
           confirmDisabled={!renameModal.value.trim()}
@@ -748,7 +779,9 @@ export default function ChatPage() {
       {deleteModal.open && (
         <Modal
           title="CONFIRM DELETION"
-          onClose={() => setDeleteModal({ open: false, chatId: null, chatName: "" })}
+          onClose={() =>
+            setDeleteModal({ open: false, chatId: null, chatName: "" })
+          }
           onConfirm={confirmDeleteChat}
           confirmLabel="DELETE"
           confirmDanger={true}

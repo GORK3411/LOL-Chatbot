@@ -34,6 +34,7 @@ namespace LOLChatbot.Api
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IChatRepository, MongoChatRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IChatService, ChatService>();
             builder.Services.AddHttpClient("agent", c =>
             {
@@ -65,7 +66,8 @@ namespace LOLChatbot.Api
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            if (!app.Environment.IsDevelopment())
+                app.UseHttpsRedirection();
 
             app.UseCors("ReactPolicy");
 

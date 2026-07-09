@@ -11,5 +11,8 @@ namespace LOLChatbot.Api.Entities
         public string Email { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
+        public bool IsVerified { get; set; } = false;
+        public string? VerificationToken { get; set; }
+        public DateTime? VerificationTokenExpires { get; set; }
     }
 }

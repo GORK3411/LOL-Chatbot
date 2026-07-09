@@ -21,6 +21,12 @@ export function register(username, email, password) {
   });
 }
 
+export function sendVerificationLink(email) {
+  return apiRequest(`/api/auth/send_link?email=${encodeURIComponent(email)}`, {
+    method: "POST",
+  });
+}
+
 export function logout() {
   localStorage.removeItem("token");
 }

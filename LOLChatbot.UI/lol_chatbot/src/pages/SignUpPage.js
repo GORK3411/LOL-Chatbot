@@ -71,7 +71,7 @@ export default function SignUpPage() {
     try {
       const data = await register(user.username, user.email, user.password);
       console.log("Success:", data);
-      navigate("/login");
+      navigate("/verify-email", { state: { email: user.email } });
     } catch (err) {
       console.error(err);
       setSubmitError("Registration failed. Please try again.");
