@@ -14,6 +14,12 @@ export async function apiRequest(endpoint, options = {}) {
     },
   });
 
+  if (response.status === 401) {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    throw new Error("Unauthorized");
+  }
+
   if (!response.ok) {
     throw new Error("API request failed");
   }

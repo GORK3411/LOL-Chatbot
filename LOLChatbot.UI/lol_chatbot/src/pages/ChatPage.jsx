@@ -108,6 +108,7 @@ export default function ChatPage() {
     chatId: null,
     value: "",
   });
+  const [chatsLoadError, setChatsLoadError] = useState(false);
   const messagesEndRef = useRef(null);
   const newChatInputRef = useRef(null);
   const renameInputRef = useRef(null);
@@ -125,10 +126,18 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isAwaitingResponse, failedMessageText]);
 
-  useEffect(() => {
+  const loadChats = () => {
+    setChatsLoadError(false);
     getMyChats()
       .then(setChats)
-      .catch((err) => console.error("Failed to fetch chats:", err));
+      .catch((err) => {
+        console.error("Failed to fetch chats:", err);
+        setChatsLoadError(true);
+      });
+  };
+
+  useEffect(() => {
+    loadChats();
   }, []);
 
   const refreshChats = async () => {
@@ -298,6 +307,62 @@ export default function ChatPage() {
     cursor: disabled ? "default" : "pointer",
     opacity: disabled ? 0.4 : 1,
   });
+
+  if (chatsLoadError) {
+    return (
+      <div
+        style={{
+          width: "100vw",
+          height: "100vh",
+          background: C.bg,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "'Inter', sans-serif",
+          color: C.textMed,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "'Cinzel', serif",
+            fontSize: "20px",
+            color: C.textLight,
+            letterSpacing: "0.06em",
+            marginBottom: "10px",
+          }}
+        >
+          The archives would not open
+        </div>
+        <div
+          style={{
+            fontSize: "14px",
+            color: C.textSubtle,
+            marginBottom: "28px",
+          }}
+        >
+          Failed to load your chats.
+        </div>
+        <button
+          type="button"
+          onClick={loadChats}
+          style={{
+            background: "transparent",
+            border: `1px solid ${C.gold}`,
+            color: C.textLight,
+            fontFamily: "'Cinzel', serif",
+            fontSize: "11px",
+            fontWeight: 600,
+            letterSpacing: "0.22em",
+            padding: "11px 22px",
+            cursor: "pointer",
+          }}
+        >
+          REFRESH
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div

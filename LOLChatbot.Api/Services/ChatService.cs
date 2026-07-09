@@ -51,7 +51,6 @@ namespace LOLChatbot.Api.Services
             var chat = await chatRepository.GetChatByIdAsync(chatId);
             if (chat == null || chat.UserId != userId) return null;
 
-            await chatRepository.AddMessageToChatAsync(chatId, MessageRole.User, message);
             chat.Messages.Add(new Message { Role = MessageRole.User, Content = message });
 
             var agentMessages = chat.Messages
@@ -65,6 +64,7 @@ namespace LOLChatbot.Api.Services
             var agentResult = await response.Content.ReadFromJsonAsync<AgentResponse>();
             var reply = agentResult!.Reply;
 
+            await chatRepository.AddMessageToChatAsync(chatId, MessageRole.User, message);
             await chatRepository.AddMessageToChatAsync(chatId, MessageRole.Assistant, reply);
             return reply;
         }

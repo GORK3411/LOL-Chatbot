@@ -30,47 +30,12 @@ inputs:
 
 UI:
 
-- make 3 to change between the theme of the app (optional)
-- add error message when the agent is not able to answer a question, also add in the chat schema a "is generating" attribute so that we know if the last message in a conversation should be a regular message or a loading message or an error message
-
-- use a stream instead of just string
+- use a stream instead of just string (optional)
 
 Backend:
 
-- mail verifictation
 - errors handling
 
 Agent:
 
 - look at everything at the top of this file.
-
----
-
-finish everything in the backend and front end so I can focus on agent
-
-The user's flow should be:
-Login -> registration -> email verification -> login -> chat with the agent
-
-Login:
-when the user tries to login one of the following should happen:
-
-- if the user is registered and verified, he is redirected to the chat page
-- if the user is registered but not verified, the user get a button to resend the verification email and a message telling him to check his email IN THE LOGIN PAGE
-- if the user is not registered, just say that the user does not exist
-- if the user is registered and verified but the password is wrong, just say that the password is wrong
-
-register:
-when the user tries to register one of the following should happen:
-
-- user have to put a valid email and a password, if the email is already registered, just say that the user is already registered
-- if the email is not valid, just say that the email is not valid
-- if the password is not valid, just say that the password is not valid
-- if the email and password are valid, send a verification email to the user and redirect him to a page that says that he should check his email to verify his account, and also add a button to resend the verification email and a button to go back to the login page
-
-chatpage:
-
-- the user can see all chats and select one to continue the conversation or start a new one
-- when the user chats with the agent one of the following should happen:
-  - if the agent is able to answer the question, it should return the answer
-  - if the agent is not able to answer the question, it should return an error message and a button to try again
-  - if the agent is generating an answer, it should return a loading message
