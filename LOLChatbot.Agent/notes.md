@@ -39,3 +39,12 @@ Backend:
 Agent:
 
 - look at everything at the top of this file.
+
+---
+
+things that does not have a taf:
+
+- untargetable
+
+divide these:
+Cooldown, OnHit, active, armorPen, attackSpeed, attention, charge, danger, evolve, factionIonia1, healing, hold, keyword, keywordMajor, keywordName, keywordStealth, lifeSteal, magicDamage, mainText, omnivamp, passive, physicalDamage, recast, release, rules, scaleAD, scaleAP, scaleArmor, scaleHealth, scaleLevel, scaleMR, scaleMana, shield, slow, specialRules, speed, spellActive, spellName, spellPassive, status, tap, toggle, trueDamage
